@@ -38,14 +38,61 @@ The repository enforces decoupled service separation to allow independent unit t
 
 ```text
 crypto-asymmetric-bot/
+├── analytics/                # Rolling statistical metrics over the tick series
 ├── config/
 │   └── settings.py           # Pydantic-validated hyperparameters & network limits
+├── data/
+│   └── database.py           # Async SQLite persistence (WAL) for ticks & trades
 ├── src/
 │   ├── scanner/              # DEX pair discovery & parallel REST/WS polling
-│   ├── audit/                # On-chain safety heuristics & holder analysis
-│   ├── strategy/             # Convex laddered Holding Map logic
+│   ├── audit/                # Entry safety heuristics (liquidity, age, order flow)
+│   ├── strategy/             # Laddered Holding Map + statistical signal generator
 │   ├── execution/            # Paper-trading OMS & real-time market liquidation
-│   ├── risk/                 # Portfolio slot allocation & loss guardrails
+│   ├── risk/                 # Position sizing & daily loss circuit breaker
 │   └── utils/                # Structured asynchronous logging
+├── tests/                    # Pytest suite covering the pure logic
 ├── main.py                   # Asyncio event loop orchestration
 └── requirements.txt
+```
+
+---
+
+## ⚡ Getting Started
+
+Install the dependencies defined in `requirements.txt`:
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+Copy the example environment file and adjust the hyperparameters (every key in
+`.env.example` maps 1:1 to a field in `config/settings.py`; the code ships with
+working defaults, so this step is optional):
+
+```bash
+cp .env.example .env
+```
+
+Run the engine in paper-trading mode:
+
+```bash
+python main.py
+```
+
+### Tests
+
+```bash
+python -m pytest
+```
+
+The suite lives in `tests/` and covers the pure logic (statistical metrics,
+holding map, entry filters, risk guardrails) plus the asynchronous SQLite
+persistence layer.
+
+Two standalone inspection utilities are **not** part of the pytest suite - they
+dump human-readable metrics and signals for the tick history already stored in
+`data/trading_history.db`. Both accept being invoked from any working directory:
+
+```bash
+python analytics/test_analytics.py
+python src/strategy/test_strategy.py

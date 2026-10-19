@@ -14,7 +14,11 @@ __pycache__/
 .pytest_cache/
 
 # Dados locais e logs
-data/*.db
+# Cobre o banco na raiz do projeto e em qualquer subpasta (ex.: data/),
+# incluindo os arquivos auxiliares do modo WAL do SQLite.
+*.db
+*.db-wal
+*.db-shm
 data/*.json
 *.log
 
@@ -23,3 +27,6 @@ data/*.json
 .idea/
 .DS_Store
 Thumbs.db
+
+repomix-output.xml
+tmp_bench.py

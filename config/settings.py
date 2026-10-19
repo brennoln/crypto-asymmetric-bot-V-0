@@ -1,6 +1,13 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
+
     PAPER_TRADING: bool = True
     POSITION_SIZE_USD: float = 15.0
     MAX_DAILY_LOSS_USD: float = 100.0
@@ -11,7 +18,7 @@ class Settings(BaseSettings):
     MIN_PROFIT_TO_EXTEND_TIME: float = 0.20 # +20% de lucro concede sobrevida à moeda
     WATCHER_INTERVAL_SEC: float = 4.0
 
-    # Critérios de Entrada (Relaxados para Maior Escaneamento)
+    # Critérios de Entrada e Microestrutura
     MIN_LIQUIDITY_USD: float = 8_000.0
     MAX_LIQUIDITY_USD: float = 120_000.0
     MIN_POOL_AGE_MINUTES: float = 15.0
@@ -24,12 +31,18 @@ class Settings(BaseSettings):
     HARD_STOP_LOSS_PCT: float = 0.35        # Drop > 35% descarta imediatamente
     MIN_RUNNING_LIQUIDITY_USD: float = 6_000.0
 
-    # Endpoints
+    # Parâmetros da Estratégia Estatística em Tempo Real
+    STAT_WINDOW_TICKS: int = 10
+    STAT_ZSCORE_THRESHOLD: float = 1.2
+    STAT_IMBALANCE_BUY: float = 0.50
+    STAT_IMBALANCE_SELL: float = -0.35
+    STAT_MIN_AGE_FOR_EXIT_MIN: float = 1.5  # Tempo mínimo antes de aceitar saída estatística por fluxo
+
+    # Endpoints Multi-Fonte do DexScreener
     DEXSCREENER_PROFILES_URL: str = "https://api.dexscreener.com/token-profiles/latest/v1"
+    DEXSCREENER_BOOSTS_LATEST_URL: str = "https://api.dexscreener.com/token-boosts/latest/v1"
+    DEXSCREENER_BOOSTS_TOP_URL: str = "https://api.dexscreener.com/token-boosts/top/v1"
     DEXSCREENER_TOKEN_URL: str = "https://api.dexscreener.com/latest/dex/tokens"
 
-    class Config:
-        env_file = ".env"
-        extra = "ignore"
 
 settings = Settings()
